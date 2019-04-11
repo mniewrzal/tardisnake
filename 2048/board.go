@@ -81,7 +81,7 @@ func NewBoard(size int) (*Board, error) {
 	}
 	go func() {
 		for {
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(150 * time.Millisecond)
 			for i := len(b.snake.body) - 1; i > 0; i-- {
 				b.snake.body[i].x = b.snake.body[i-1].x
 				b.snake.body[i].y = b.snake.body[i-1].y
@@ -93,6 +93,7 @@ func NewBoard(size int) (*Board, error) {
 			if b.food.tiles[0] != nil {
 				for _, f := range b.food.tiles {
 					if b.snake.body[0].x == f.x && b.snake.body[0].y == f.y {
+						b.generateFood()
 						tail := len(b.snake.body) - 1
 						newTile := &Tile{x: b.snake.body[tail].x, y: b.snake.body[tail].y}
 						b.snake.body = append(b.snake.body, newTile)
