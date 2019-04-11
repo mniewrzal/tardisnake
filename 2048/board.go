@@ -1,16 +1,14 @@
 package twenty48
 
 import (
-	"errors"
 	"image/color"
 	"math/rand"
 	"time"
 
 	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/ebiten/ebitenutil"
 	"golang.org/x/image/font"
 )
-
-var taskTerminated = errors.New("twenty48: task terminated")
 
 var (
 	tileSize   = 50
@@ -32,11 +30,14 @@ const (
 
 var (
 	arcadeFonts map[int]font.Face
+	foodImage   *ebiten.Image
 )
 
 func init() {
 	tileImage, _ = ebiten.NewImage(tileSize, tileSize, ebiten.FilterDefault)
 	tileImage.Fill(color.White)
+
+	foodImage, _, _ = ebitenutil.NewImageFromFile("encrypt.png", ebiten.FilterDefault)
 }
 
 type task func() error
@@ -225,7 +226,7 @@ func (board *Board) Draw(boardImage *ebiten.Image) {
 
 		r, g, b, a := colorToScale(color.NRGBA{0xee, 0xAA, 0xAA, 0xAA})
 		op.ColorM.Scale(r, g, b, a)
-		boardImage.DrawImage(tileImage, op)
+		boardImage.DrawImage(foodImage, op)
 	}
 }
 
