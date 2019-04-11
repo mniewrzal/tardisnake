@@ -4,6 +4,7 @@ package twenty48
 import (
 	"errors"
 	"image/color"
+	"time"
 
 	"github.com/hajimehoshi/ebiten"
 )
@@ -35,26 +36,40 @@ type Tile struct {
 	x int
 	y int
 }
+type Snake struct {
+	body []*Tile
+	directionX int
+	directionY int
+}
 
 // Board represents the game board.
 type Board struct {
 	size int
-	// //	tiles map[*Tile]struct{}
-	// 	tasks []task
-	snake  Tile
-
+	snake  Snake
 }
 
 // NewBoard generates a new Board with giving a size.
 func NewBoard(size int) (*Board, error) {
 	b := &Board{
 		size: size,
-		snake : Tile{
-			x:0,
-			y:0,
+		snake : Snake{
+			body : []*Tile {
+				&Tile{
+					x:0,
+					y:0,
+				},
+
+			},
+			directionX : 1,
+			directionY : 1,
 		},
 	}
+	go func ()  {
+		time.Sleep(2 * time.Second)
+		b.snake.body[0].x += b.snake.directionX
+		b.snake.body[0].y += b.snake.directionY
 
+	}()
 	return b, nil
 }
 
@@ -145,14 +160,16 @@ func (board *Board) Draw(boardImage *ebiten.Image) {
 		}
 	}
 
-	op := &ebiten.DrawImageOptions{}
-	x := board.snake.x*tileSize + (board.snake.x+1)*tileMargin
-	y :=  board.snake.y*tileSize + ( board.snake.y+1)*tileMargin
-	op.GeoM.Translate(float64(x), float64(y))
-
-	r, g, b, a := colorToScale(color.NRGBA{0xee, 0xFF, 0xFF, 0xFF})
-	op.ColorM.Scale(r, g, b, a)
-	boardImage.DrawImage(tileImage, op)
+	for _, tile := range board.snake.body {
+		op := &ebiten.DrawImageOptions{}
+		x := tile.x*tileSize + (tile.x+1)*tileMargin
+		y :=  tile.y*tileSize + ( tile.y+1)*tileMargin
+		op.GeoM.Translate(float64(x), float64(y))
+	
+		r, g, b, a := colorToScale(color.NRGBA{0xee, 0xFF, 0xFF, 0xFF})
+		op.ColorM.Scale(r, g, b, a)
+		boardImage.DrawImage(tileImage, op)
+	}
 }
 
 func colorToScale(clr color.Color) (float64, float64, float64, float64) {
