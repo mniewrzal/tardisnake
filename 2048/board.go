@@ -3,10 +3,15 @@ package twenty48
 import (
 	"errors"
 	"image/color"
+	"log"
 	"math/rand"
 	"time"
 
+	"github.com/golang/freetype/truetype"
 	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/ebiten/examples/resources/fonts"
+	"github.com/hajimehoshi/ebiten/text"
+	"golang.org/x/image/font"
 )
 
 var taskTerminated = errors.New("twenty48: task terminated")
@@ -19,10 +24,19 @@ var (
 var (
 	backgroundColor = color.RGBA{0xfa, 0xf8, 0xef, 0xff}
 	frameColor      = color.RGBA{0xbb, 0xad, 0xa0, 0xff}
+	shadowColor     = color.NRGBA{0, 0, 0, 0x80}
 )
 
 var (
 	tileImage *ebiten.Image
+)
+
+const (
+	arcadeFontBaseSize = 8
+)
+
+var (
+	arcadeFonts map[int]font.Face
 )
 
 func init() {
@@ -61,15 +75,15 @@ func NewBoard(size int) (*Board, error) {
 		snake: Snake{
 			body: []*Tile{
 				&Tile{
-					x:2,
-					y:0,
+					x: 2,
+					y: 0,
 				},
 				&Tile{
-					x:1,
-					y:0,
-				},&Tile{
-					x:0,
-					y:0,
+					x: 1,
+					y: 0,
+				}, &Tile{
+					x: 0,
+					y: 0,
 				},
 			},
 			directionX: 1,
@@ -90,7 +104,7 @@ func NewBoard(size int) (*Board, error) {
 			}
 			b.snake.body[0].x += b.snake.directionX
 			b.snake.body[0].y += b.snake.directionY
-			
+
 		}
 	}()
 	go func() {
@@ -195,6 +209,7 @@ func (board *Board) Draw(boardImage *ebiten.Image) {
 		boardImage.DrawImage(tileImage, op)
 	}
 
+	text.Draw(boardImage, "Points: ", getArcadeFonts(3), 100, 100, shadowColor)
 }
 
 func colorToScale(clr color.Color) (float64, float64, float64, float64) {
@@ -210,4 +225,24 @@ func colorToScale(clr color.Color) (float64, float64, float64, float64) {
 		bf /= af
 	}
 	return rf, gf, bf, af
+}
+
+func getArcadeFonts(scale int) font.Face {
+	if arcadeFonts == nil {
+		tt, err := truetype.Parse(fonts.ArcadeN_ttf)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		arcadeFonts = map[int]font.Face{}
+		for i := 1; i <= 4; i++ {
+			const dpi = 72
+			arcadeFonts[i] = truetype.NewFace(tt, &truetype.Options{
+				Size:    float64(arcadeFontBaseSize * i),
+				DPI:     dpi,
+				Hinting: font.HintingFull,
+			})
+		}
+	}
+	return arcadeFonts[scale]
 }
