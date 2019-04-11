@@ -31,18 +31,30 @@ func init() {
 
 type task func() error
 
+type Tile struct {
+	x int
+	y int
+}
+
 // Board represents the game board.
 type Board struct {
 	size int
 	// //	tiles map[*Tile]struct{}
 	// 	tasks []task
+	snake  Tile
+
 }
 
 // NewBoard generates a new Board with giving a size.
 func NewBoard(size int) (*Board, error) {
 	b := &Board{
 		size: size,
+		snake : Tile{
+			x:0,
+			y:0,
+		},
 	}
+
 	return b, nil
 }
 
@@ -117,10 +129,10 @@ func (b *Board) Size() (int, int) {
 }
 
 // Draw draws the board to the given boardImage.
-func (b *Board) Draw(boardImage *ebiten.Image) {
+func (board *Board) Draw(boardImage *ebiten.Image) {
 	boardImage.Fill(frameColor)
-	for j := 0; j < b.size; j++ {
-		for i := 0; i < b.size; i++ {
+	for j := 0; j < board.size; j++ {
+		for i := 0; i < board.size; i++ {
 			// v := 0
 			op := &ebiten.DrawImageOptions{}
 			x := i*tileSize + (i+1)*tileMargin
@@ -132,6 +144,15 @@ func (b *Board) Draw(boardImage *ebiten.Image) {
 			boardImage.DrawImage(tileImage, op)
 		}
 	}
+
+	op := &ebiten.DrawImageOptions{}
+	x := board.snake.x*tileSize + (board.snake.x+1)*tileMargin
+	y :=  board.snake.y*tileSize + ( board.snake.y+1)*tileMargin
+	op.GeoM.Translate(float64(x), float64(y))
+
+	r, g, b, a := colorToScale(color.NRGBA{0xee, 0xFF, 0xFF, 0xFF})
+	op.ColorM.Scale(r, g, b, a)
+	boardImage.DrawImage(tileImage, op)
 }
 
 func colorToScale(clr color.Color) (float64, float64, float64, float64) {
