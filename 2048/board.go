@@ -36,6 +36,7 @@ type Tile struct {
 	x int
 	y int
 }
+
 type Snake struct {
 	body []*Tile
 	directionX int
@@ -61,80 +62,39 @@ func NewBoard(size int) (*Board, error) {
 
 			},
 			directionX : 1,
-			directionY : 1,
+			directionY : 0,
 		},
 	}
 	go func ()  {
-		time.Sleep(2 * time.Second)
-		b.snake.body[0].x += b.snake.directionX
-		b.snake.body[0].y += b.snake.directionY
-
+		for {
+			time.Sleep(2 * time.Second)
+			b.snake.body[0].x += b.snake.directionX
+			b.snake.body[0].y += b.snake.directionY
+		}
 	}()
 	return b, nil
 }
 
 // Update updates the board state.
 func (b *Board) Update(input *Input) error {
-	// 	for t := range b.tiles {
-	// 		if err := t.Update(); err != nil {
-	// 			return err
-	// 		}
-	// 	}
-	// 	if 0 < len(b.tasks) {
-	// 		t := b.tasks[0]
-	// 		if err := t(); err == taskTerminated {
-	// 			b.tasks = b.tasks[1:]
-	// 		} else if err != nil {
-	// 			return err
-	// 		}
-	// 		return nil
-	// 	}
-	// 	if dir, ok := input.Dir(); ok {
-	// 		if err := b.Move(dir); err != nil {
-	// 			return err
-	// 		}
-	// 	}
+	if dir, ok := input.Dir(); ok {
+		switch dir {
+		case DirDown:
+			b.snake.directionX = 0
+			b.snake.directionY = 1
+		case DirUp:
+			b.snake.directionX = 0
+			b.snake.directionY = -1
+		case DirLeft:
+			b.snake.directionX = -1
+			b.snake.directionY = 0
+		case DirRight:
+			b.snake.directionX = 1
+			b.snake.directionY = 0
+		}
+	}
 	return nil
 }
-
-// // Move enqueues tile moving tasks.
-// func (b *Board) Move(dir Dir) error {
-// 	for t := range b.tiles {
-// 		t.stopAnimation()
-// 	}
-// 	if !MoveTiles(b.tiles, b.size, dir) {
-// 		return nil
-// 	}
-// 	b.tasks = append(b.tasks, func() error {
-// 		for t := range b.tiles {
-// 			if t.IsMoving() {
-// 				return nil
-// 			}
-// 		}
-// 		return taskTerminated
-// 	})
-// 	b.tasks = append(b.tasks, func() error {
-// 		nextTiles := map[*Tile]struct{}{}
-// 		for t := range b.tiles {
-// 			if t.IsMoving() {
-// 				panic("not reach")
-// 			}
-// 			if t.next.value != 0 {
-// 				panic("not reach")
-// 			}
-// 			if t.current.value == 0 {
-// 				continue
-// 			}
-// 			nextTiles[t] = struct{}{}
-// 		}
-// 		b.tiles = nextTiles
-// 		if err := addRandomTile(b.tiles, b.size); err != nil {
-// 			return err
-// 		}
-// 		return taskTerminated
-// 	})
-// 	return nil
-// }
 
 // Size returns the board size.
 func (b *Board) Size() (int, int) {
