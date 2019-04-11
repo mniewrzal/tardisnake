@@ -1,9 +1,9 @@
-
 package twenty48
 
 import (
 	"errors"
 	"image/color"
+	"math/rand"
 	"time"
 
 	"github.com/hajimehoshi/ebiten"
@@ -38,41 +38,77 @@ type Tile struct {
 }
 
 type Snake struct {
-	body []*Tile
+	body       []*Tile
 	directionX int
 	directionY int
 }
 
+type Food struct {
+	tiles []*Tile
+}
+
 // Board represents the game board.
 type Board struct {
-	size int
-	snake  Snake
+	size  int
+	snake Snake
+	food  Food
 }
 
 // NewBoard generates a new Board with giving a size.
 func NewBoard(size int) (*Board, error) {
 	b := &Board{
 		size: size,
-		snake : Snake{
-			body : []*Tile {
+		snake: Snake{
+			body: []*Tile{
 				&Tile{
-					x:0,
-					y:0,
+					x: 0,
+					y: 0,
 				},
-
 			},
-			directionX : 1,
-			directionY : 0,
+			directionX: 1,
+			directionY: 0,
+		},
+		food: Food{
+			tiles: make([]*Tile, 1),
 		},
 	}
-	go func ()  {
+	go func() {
 		for {
-			time.Sleep(2 * time.Second)
+			time.Sleep(1 * time.Second)
 			b.snake.body[0].x += b.snake.directionX
 			b.snake.body[0].y += b.snake.directionY
 		}
 	}()
+	go func() {
+		for {
+			time.Sleep(4 * time.Second)
+			b.generateFood()
+		}
+	}()
 	return b, nil
+}
+
+func (b *Board) generateFood() {
+	for {
+		newFoodTile := &Tile{
+			x: rand.Intn(b.size),
+			y: rand.Intn(b.size),
+		}
+
+		if !exists(b.snake.body, newFoodTile) {
+			b.food.tiles[0] = newFoodTile
+			return
+		}
+	}
+}
+
+func exists(tiles []*Tile, target *Tile) bool {
+	for _, tile := range tiles {
+		if target.x == tile.x && target.y == tile.y {
+			return true
+		}
+	}
+	return false
 }
 
 // Update updates the board state.
@@ -123,13 +159,28 @@ func (board *Board) Draw(boardImage *ebiten.Image) {
 	for _, tile := range board.snake.body {
 		op := &ebiten.DrawImageOptions{}
 		x := tile.x*tileSize + (tile.x+1)*tileMargin
-		y :=  tile.y*tileSize + ( tile.y+1)*tileMargin
+		y := tile.y*tileSize + (tile.y+1)*tileMargin
 		op.GeoM.Translate(float64(x), float64(y))
-	
+
 		r, g, b, a := colorToScale(color.NRGBA{0xee, 0xFF, 0xFF, 0xFF})
 		op.ColorM.Scale(r, g, b, a)
 		boardImage.DrawImage(tileImage, op)
 	}
+
+	for _, tile := range board.food.tiles {
+		if tile == nil {
+			continue
+		}
+		op := &ebiten.DrawImageOptions{}
+		x := tile.x*tileSize + (tile.x+1)*tileMargin
+		y := tile.y*tileSize + (tile.y+1)*tileMargin
+		op.GeoM.Translate(float64(x), float64(y))
+
+		r, g, b, a := colorToScale(color.NRGBA{0xee, 0xAA, 0xAA, 0xAA})
+		op.ColorM.Scale(r, g, b, a)
+		boardImage.DrawImage(tileImage, op)
+	}
+
 }
 
 func colorToScale(clr color.Color) (float64, float64, float64, float64) {

@@ -15,7 +15,7 @@ func init() {
 
 const (
 	ScreenWidth  = 1020
-	ScreenHeight = 1300
+	ScreenHeight = 1000
 	boardSize    = 15
 )
 
