@@ -81,16 +81,24 @@ func NewBoard(size int) (*Board, error) {
 	}
 	go func() {
 		for {
-			time.Sleep(1 * time.Second)
+			time.Sleep(500 * time.Millisecond)
 			for i := len(b.snake.body) - 1; i > 0; i-- {
-				newTile := &Tile{x: b.snake.body[i].x, y: b.snake.body[i].y}
-				b.snake.body = append(b.snake.body, newTile)
 				b.snake.body[i].x = b.snake.body[i-1].x
 				b.snake.body[i].y = b.snake.body[i-1].y
 			}
 			b.snake.body[0].x += b.snake.directionX
 			b.snake.body[0].y += b.snake.directionY
-			
+
+			// check if food has been found
+			if b.food.tiles[0] != nil {
+				for _, f := range b.food.tiles {
+					if b.snake.body[0].x == f.x && b.snake.body[0].y == f.y {
+						tail := len(b.snake.body) - 1
+						newTile := &Tile{x: b.snake.body[tail].x, y: b.snake.body[tail].y}
+						b.snake.body = append(b.snake.body, newTile)
+					}
+				}
+			}
 		}
 	}()
 	go func() {
