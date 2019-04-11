@@ -80,20 +80,40 @@ func NewBoard(size int) (*Board, error) {
 			tiles: make([]*Tile, 1),
 		},
 	}
+	head := b.snake.body[0]
 	go func() {
 		for {
 			time.Sleep(150 * time.Millisecond)
+			
+			next := &Tile{
+				x: head.x + b.snake.directionX,
+				y: head.y + b.snake.directionY,
+			}
+			if exists(b.snake.body, next) {
+				if exists([]*Tile{next}, b.snake.body[1]) {
+					if b.snake.directionX != 0 {
+						b.snake.directionX *= -1
+					}
+					if b.snake.directionY != 0 {
+						b.snake.directionY *= -1
+					}
+				} else {
+					fmt.Println("Snake ate itself. Game over :(")
+					return
+				}
+			}
+
 			for i := len(b.snake.body) - 1; i > 0; i-- {
 				b.snake.body[i].x = b.snake.body[i-1].x
 				b.snake.body[i].y = b.snake.body[i-1].y
 			}
-			b.snake.body[0].x += b.snake.directionX
-			b.snake.body[0].y += b.snake.directionY
+			head.x += b.snake.directionX
+			head.y += b.snake.directionY
 
 			// check if food has been found
 			if b.food.tiles[0] != nil {
 				for _, f := range b.food.tiles {
-					if b.snake.body[0].x == f.x && b.snake.body[0].y == f.y {
+					if head.x == f.x && head.y == f.y {
 						b.generateFood()
 						tail := len(b.snake.body) - 1
 						newTile := &Tile{x: b.snake.body[tail].x, y: b.snake.body[tail].y}
