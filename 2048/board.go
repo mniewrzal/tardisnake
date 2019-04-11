@@ -2,6 +2,7 @@ package twenty48
 
 import (
 	"errors"
+	"fmt"
 	"image/color"
 	"math/rand"
 	"time"
@@ -61,15 +62,15 @@ func NewBoard(size int) (*Board, error) {
 		snake: Snake{
 			body: []*Tile{
 				&Tile{
-					x:2,
-					y:0,
+					x: 2,
+					y: 0,
 				},
 				&Tile{
-					x:1,
-					y:0,
-				},&Tile{
-					x:0,
-					y:0,
+					x: 1,
+					y: 0,
+				}, &Tile{
+					x: 0,
+					y: 0,
 				},
 			},
 			directionX: 1,
@@ -90,7 +91,6 @@ func NewBoard(size int) (*Board, error) {
 			}
 			b.snake.body[0].x += b.snake.directionX
 			b.snake.body[0].y += b.snake.directionY
-			
 		}
 	}()
 	go func() {
@@ -151,6 +151,12 @@ func (b *Board) Size() (int, int) {
 	x := b.size*tileSize + (b.size+1)*tileMargin
 	y := x
 	return x, y
+}
+
+// GetPoints returns the points won so far
+func (b *Board) GetPoints() int {
+	fmt.Println("length snake body tiles", len(b.snake.body))
+	return len(b.snake.body) - 3
 }
 
 // Draw draws the board to the given boardImage.
