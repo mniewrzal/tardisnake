@@ -1,8 +1,8 @@
 package twenty48
 
 import (
-	"image/color"
 	"fmt"
+	"image/color"
 	"math/rand"
 	"time"
 
@@ -94,7 +94,7 @@ func NewBoard(size int) (*Board, error) {
 	go func() {
 		for {
 			time.Sleep(150 * time.Millisecond)
-			
+
 			next := &Tile{
 				x: head.x + b.snake.directionX,
 				y: head.y + b.snake.directionY,
@@ -224,13 +224,19 @@ func (board *Board) Draw(boardImage *ebiten.Image) {
 		}
 	}
 
-	for _, tile := range board.snake.body {
+	for i, tile := range board.snake.body {
+		var snakeColor color.NRGBA
+		if i == 0 {
+			snakeColor = color.NRGBA{0x00, 0xFF, 0xCC, 0xFF}
+		} else {
+			snakeColor = color.NRGBA{0xee, 0xFF, 0xFF, 0xFF}
+		}
 		op := &ebiten.DrawImageOptions{}
 		x := tile.x*tileSize + (tile.x+1)*tileMargin
 		y := tile.y*tileSize + (tile.y+1)*tileMargin
 		op.GeoM.Translate(float64(x), float64(y))
 
-		r, g, b, a := colorToScale(color.NRGBA{0xee, 0xFF, 0xFF, 0xFF})
+		r, g, b, a := colorToScale(snakeColor)
 		op.ColorM.Scale(r, g, b, a)
 		boardImage.DrawImage(tileImage, op)
 	}
