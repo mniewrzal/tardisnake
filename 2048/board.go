@@ -3,14 +3,10 @@ package twenty48
 import (
 	"errors"
 	"image/color"
-	"log"
 	"math/rand"
 	"time"
 
-	"github.com/golang/freetype/truetype"
 	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/examples/resources/fonts"
-	"github.com/hajimehoshi/ebiten/text"
 	"golang.org/x/image/font"
 )
 
@@ -24,7 +20,6 @@ var (
 var (
 	backgroundColor = color.RGBA{0xfa, 0xf8, 0xef, 0xff}
 	frameColor      = color.RGBA{0xbb, 0xad, 0xa0, 0xff}
-	shadowColor     = color.NRGBA{0, 0, 0, 0x80}
 )
 
 var (
@@ -95,16 +90,25 @@ func NewBoard(size int) (*Board, error) {
 	}
 	go func() {
 		for {
-			time.Sleep(1 * time.Second)
+			time.Sleep(150 * time.Millisecond)
 			for i := len(b.snake.body) - 1; i > 0; i-- {
-				newTile := &Tile{x: b.snake.body[i].x, y: b.snake.body[i].y}
-				b.snake.body = append(b.snake.body, newTile)
 				b.snake.body[i].x = b.snake.body[i-1].x
 				b.snake.body[i].y = b.snake.body[i-1].y
 			}
 			b.snake.body[0].x += b.snake.directionX
 			b.snake.body[0].y += b.snake.directionY
 
+			// check if food has been found
+			if b.food.tiles[0] != nil {
+				for _, f := range b.food.tiles {
+					if b.snake.body[0].x == f.x && b.snake.body[0].y == f.y {
+						b.generateFood()
+						tail := len(b.snake.body) - 1
+						newTile := &Tile{x: b.snake.body[tail].x, y: b.snake.body[tail].y}
+						b.snake.body = append(b.snake.body, newTile)
+					}
+				}
+			}
 		}
 	}()
 	go func() {
@@ -167,6 +171,11 @@ func (b *Board) Size() (int, int) {
 	return x, y
 }
 
+// GetPoints returns the points won so far
+func (b *Board) GetPoints() int {
+	return len(b.snake.body) - 3
+}
+
 // Draw draws the board to the given boardImage.
 func (board *Board) Draw(boardImage *ebiten.Image) {
 	boardImage.Fill(frameColor)
@@ -208,8 +217,6 @@ func (board *Board) Draw(boardImage *ebiten.Image) {
 		op.ColorM.Scale(r, g, b, a)
 		boardImage.DrawImage(tileImage, op)
 	}
-
-	text.Draw(boardImage, "Points: ", getArcadeFonts(3), 100, 100, shadowColor)
 }
 
 func colorToScale(clr color.Color) (float64, float64, float64, float64) {
@@ -225,24 +232,4 @@ func colorToScale(clr color.Color) (float64, float64, float64, float64) {
 		bf /= af
 	}
 	return rf, gf, bf, af
-}
-
-func getArcadeFonts(scale int) font.Face {
-	if arcadeFonts == nil {
-		tt, err := truetype.Parse(fonts.ArcadeN_ttf)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		arcadeFonts = map[int]font.Face{}
-		for i := 1; i <= 4; i++ {
-			const dpi = 72
-			arcadeFonts[i] = truetype.NewFace(tt, &truetype.Options{
-				Size:    float64(arcadeFontBaseSize * i),
-				DPI:     dpi,
-				Hinting: font.HintingFull,
-			})
-		}
-	}
-	return arcadeFonts[scale]
 }
