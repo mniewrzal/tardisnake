@@ -1,8 +1,8 @@
 package twenty48
 
 import (
-	"image/color"
 	"fmt"
+	"image/color"
 	"math/rand"
 	"time"
 
@@ -94,7 +94,7 @@ func NewBoard(size int) (*Board, error) {
 	go func() {
 		for {
 			time.Sleep(150 * time.Millisecond)
-			
+
 			next := &Tile{
 				x: head.x + b.snake.directionX,
 				y: head.y + b.snake.directionY,
@@ -117,13 +117,20 @@ func NewBoard(size int) (*Board, error) {
 				b.snake.body[i].x = b.snake.body[i-1].x
 				b.snake.body[i].y = b.snake.body[i-1].y
 			}
+			fmt.Println("direction", b.snake.directionX)
 			if head.x <= b.size {
+				if head.x == 0 && b.snake.directionX == -1 {
+					head.x = b.size + 1
+				}
 				head.x += b.snake.directionX
 			} else {
 				head.x -= b.size + 1
 			}
 
 			if head.y <= b.size {
+				if head.y == 0 && b.snake.directionY == -1 {
+					head.y = b.size + 1
+				}
 				head.y += b.snake.directionY
 			} else {
 				head.y -= b.size + 1
@@ -214,8 +221,8 @@ func (board *Board) Draw(boardImage *ebiten.Image) {
 		for i := 0; i < board.size; i++ {
 			// v := 0
 			op := &ebiten.DrawImageOptions{}
-			x := i*tileSize + (i+1)*tileMargin
-			y := j*tileSize + (j+1)*tileMargin
+			x := i * tileSize
+			y := j * tileSize
 			op.GeoM.Translate(float64(x), float64(y))
 
 			r, g, b, a := colorToScale(color.NRGBA{0xee, 0xe4, 0xda, 0x59})
@@ -226,8 +233,8 @@ func (board *Board) Draw(boardImage *ebiten.Image) {
 
 	for _, tile := range board.snake.body {
 		op := &ebiten.DrawImageOptions{}
-		x := tile.x*tileSize + (tile.x+1)*tileMargin
-		y := tile.y*tileSize + (tile.y+1)*tileMargin
+		x := tile.x * tileSize
+		y := tile.y * tileSize
 		op.GeoM.Translate(float64(x), float64(y))
 
 		r, g, b, a := colorToScale(color.NRGBA{0xee, 0xFF, 0xFF, 0xFF})
@@ -240,8 +247,8 @@ func (board *Board) Draw(boardImage *ebiten.Image) {
 			continue
 		}
 		op := &ebiten.DrawImageOptions{}
-		x := tile.x*tileSize + (tile.x+1)*tileMargin
-		y := tile.y*tileSize + (tile.y+1)*tileMargin
+		x := tile.x * tileSize
+		y := tile.y * tileSize
 		op.GeoM.Translate(float64(x), float64(y))
 
 		r, g, b, a := colorToScale(color.NRGBA{0xee, 0xAA, 0xAA, 0xAA})
