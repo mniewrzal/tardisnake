@@ -87,8 +87,18 @@ func NewBoard(size int) (*Board, error) {
 				b.snake.body[i].x = b.snake.body[i-1].x
 				b.snake.body[i].y = b.snake.body[i-1].y
 			}
-			b.snake.body[0].x += b.snake.directionX
-			b.snake.body[0].y += b.snake.directionY
+			if b.snake.body[0].x <= b.size {
+				b.snake.body[0].x += b.snake.directionX
+			} else {
+				b.snake.body[0].x -= b.size + 1
+			}
+
+			if b.snake.body[0].y <= b.size {
+
+				b.snake.body[0].y += b.snake.directionY
+			} else {
+				b.snake.body[0].y -= b.size + 1
+			}
 
 			// check if food has been found
 			if b.food.tiles[0] != nil {
