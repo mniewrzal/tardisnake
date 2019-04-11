@@ -4,9 +4,11 @@ package twenty48
 
 import (
 	"math/rand"
+	"strconv"
 	"time"
 
 	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/ebiten/ebitenutil"
 )
 
 func init() {
@@ -63,4 +65,5 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	y := (sh - bh) / 2
 	op.GeoM.Translate(float64(x), float64(y))
 	screen.DrawImage(g.boardImage, op)
+	ebitenutil.DebugPrint(screen, "Points: "+strconv.Itoa(g.board.GetPoints()))
 }
