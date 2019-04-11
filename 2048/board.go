@@ -61,8 +61,15 @@ func NewBoard(size int) (*Board, error) {
 		snake: Snake{
 			body: []*Tile{
 				&Tile{
-					x: 0,
-					y: 0,
+					x:2,
+					y:0,
+				},
+				&Tile{
+					x:1,
+					y:0,
+				},&Tile{
+					x:0,
+					y:0,
 				},
 			},
 			directionX: 1,
@@ -75,8 +82,15 @@ func NewBoard(size int) (*Board, error) {
 	go func() {
 		for {
 			time.Sleep(1 * time.Second)
+			for i := len(b.snake.body) - 1; i > 0; i-- {
+				newTile := &Tile{x: b.snake.body[i].x, y: b.snake.body[i].y}
+				b.snake.body = append(b.snake.body, newTile)
+				b.snake.body[i].x = b.snake.body[i-1].x
+				b.snake.body[i].y = b.snake.body[i-1].y
+			}
 			b.snake.body[0].x += b.snake.directionX
 			b.snake.body[0].y += b.snake.directionY
+			
 		}
 	}()
 	go func() {
