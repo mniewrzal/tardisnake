@@ -3,17 +3,18 @@
 package twenty48
 
 import (
+	"image/color"
+	"log"
 	"math/rand"
 	"strconv"
 	"time"
 
+	"github.com/golang/freetype/truetype"
 	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/ebitenutil"
+	"github.com/hajimehoshi/ebiten/examples/resources/fonts"
+	"github.com/hajimehoshi/ebiten/text"
+	"golang.org/x/image/font"
 )
-
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
 
 const (
 	ScreenWidth  = 1020
@@ -21,11 +22,19 @@ const (
 	boardSize    = 15
 )
 
+var (
+	shadowColor = color.NRGBA{0, 0, 0, 0x80}
+)
+
 // Game represents a game state.
 type Game struct {
 	input      *Input
 	board      *Board
 	boardImage *ebiten.Image
+}
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
 }
 
 // NewGame generates a new Game object.
@@ -65,5 +74,26 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	y := (sh - bh) / 2
 	op.GeoM.Translate(float64(x), float64(y))
 	screen.DrawImage(g.boardImage, op)
-	ebitenutil.DebugPrint(screen, "Points: "+strconv.Itoa(g.board.GetPoints()))
+
+	text.Draw(screen, "Points: "+strconv.Itoa(g.board.GetPoints()), getArcadeFonts(3), 10, 30, shadowColor)
+}
+
+func getArcadeFonts(scale int) font.Face {
+	if arcadeFonts == nil {
+		tt, err := truetype.Parse(fonts.ArcadeN_ttf)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		arcadeFonts = map[int]font.Face{}
+		for i := 1; i <= 4; i++ {
+			const dpi = 72
+			arcadeFonts[i] = truetype.NewFace(tt, &truetype.Options{
+				Size:    float64(arcadeFontBaseSize * i),
+				DPI:     dpi,
+				Hinting: font.HintingFull,
+			})
+		}
+	}
+	return arcadeFonts[scale]
 }

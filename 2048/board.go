@@ -1,16 +1,15 @@
 package twenty48
 
 import (
-	"errors"
-	"fmt"
 	"image/color"
+	"fmt"
 	"math/rand"
 	"time"
 
 	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/ebiten/ebitenutil"
+	"golang.org/x/image/font"
 )
-
-var taskTerminated = errors.New("twenty48: task terminated")
 
 var (
 	tileSize   = 50
@@ -26,9 +25,20 @@ var (
 	tileImage *ebiten.Image
 )
 
+const (
+	arcadeFontBaseSize = 8
+)
+
+var (
+	arcadeFonts map[int]font.Face
+	foodImage   *ebiten.Image
+)
+
 func init() {
 	tileImage, _ = ebiten.NewImage(tileSize, tileSize, ebiten.FilterDefault)
 	tileImage.Fill(color.White)
+
+	foodImage, _, _ = ebitenutil.NewImageFromFile("encrypt.png", ebiten.FilterDefault)
 }
 
 type task func() error
@@ -107,8 +117,17 @@ func NewBoard(size int) (*Board, error) {
 				b.snake.body[i].x = b.snake.body[i-1].x
 				b.snake.body[i].y = b.snake.body[i-1].y
 			}
-			head.x += b.snake.directionX
-			head.y += b.snake.directionY
+			if head.x <= b.size {
+				head.x += b.snake.directionX
+			} else {
+				head.x -= b.size + 1
+			}
+
+			if head.y <= b.size {
+				head.y += b.snake.directionY
+			} else {
+				head.y -= b.size + 1
+			}
 
 			// check if food has been found
 			if b.food.tiles[0] != nil {
@@ -185,7 +204,6 @@ func (b *Board) Size() (int, int) {
 
 // GetPoints returns the points won so far
 func (b *Board) GetPoints() int {
-	fmt.Println("length snake body tiles", len(b.snake.body))
 	return len(b.snake.body) - 3
 }
 
@@ -228,9 +246,8 @@ func (board *Board) Draw(boardImage *ebiten.Image) {
 
 		r, g, b, a := colorToScale(color.NRGBA{0xee, 0xAA, 0xAA, 0xAA})
 		op.ColorM.Scale(r, g, b, a)
-		boardImage.DrawImage(tileImage, op)
+		boardImage.DrawImage(foodImage, op)
 	}
-
 }
 
 func colorToScale(clr color.Color) (float64, float64, float64, float64) {
