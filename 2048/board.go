@@ -22,12 +22,15 @@ var (
 
 	frameColor = color.RGBA{0xbb, 0xad, 0xa0, 0xff}
 
-	tileImage       *ebiten.Image
-	arcadeFonts     map[int]font.Face
-	chosenFood      *ebiten.Image
-	foodImage       *ebiten.Image
-	foodImage2      *ebiten.Image
-	backgroundImage *ebiten.Image
+	tileImage        *ebiten.Image
+	arcadeFonts      map[int]font.Face
+	chosenFood       *ebiten.Image
+	foodImage        *ebiten.Image
+	foodImage2       *ebiten.Image
+	backgroundImage  *ebiten.Image
+	backgroundImage2 *ebiten.Image
+	backgroundImage3 *ebiten.Image
+	backgroundImage4 *ebiten.Image
 
 	tardiHeadImageUp    *ebiten.Image
 	tardiHeadImageRight *ebiten.Image
@@ -46,6 +49,18 @@ func init() {
 	if err != nil {
 		fmt.Println(err)
 	}
+	backgroundImage2, _, err = ebitenutil.NewImageFromFile("desert.png", ebiten.FilterDefault)
+	if err != nil {
+		fmt.Println(err)
+	}
+	backgroundImage3, _, err = ebitenutil.NewImageFromFile("underwater.png", ebiten.FilterDefault)
+	if err != nil {
+		fmt.Println(err)
+	}
+	backgroundImage4, _, err = ebitenutil.NewImageFromFile("snowy.png", ebiten.FilterDefault)
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	tardiHeadImageUp, _, _ = ebitenutil.NewImageFromFile("t1.png", ebiten.FilterDefault)
 	tardiHeadImageRight, _, _ = ebitenutil.NewImageFromFile("t2.png", ebiten.FilterDefault)
@@ -54,8 +69,8 @@ func init() {
 }
 
 type Tile struct {
-	x int
-	y int
+	x    int
+	y    int
 	dirX int
 	dirY int
 }
@@ -73,7 +88,7 @@ type Food struct {
 // Board represents the game board.
 type Board struct {
 	size     int
-	sounds    *sounds
+	sounds   *sounds
 	snake    Snake
 	food     Food
 	playMode bool
@@ -82,24 +97,24 @@ type Board struct {
 // NewBoard generates a new Board with giving a size.
 func NewBoard(sounds *sounds, size int) (*Board, error) {
 	b := &Board{
-		size: size,
+		size:   size,
 		sounds: sounds,
 		snake: Snake{
 			body: []*Tile{
 				&Tile{
-					x: 2,
-					y: 0,
+					x:    2,
+					y:    0,
 					dirX: 1,
 					dirY: 0,
 				},
 				&Tile{
-					x: 1,
-					y: 0,
+					x:    1,
+					y:    0,
 					dirX: 1,
 					dirY: 0,
 				}, &Tile{
-					x: 0,
-					y: 0,
+					x:    0,
+					y:    0,
 					dirX: 1,
 					dirY: 0,
 				},
@@ -183,7 +198,7 @@ func NewBoard(sounds *sounds, size int) (*Board, error) {
 					if head.x == f.x && head.y == f.y {
 						sounds.score.Rewind()
 						sounds.score.Play()
-						
+
 						r := rand.Intn(2)
 						if r == 0 {
 							chosenFood = foodImage
@@ -193,8 +208,8 @@ func NewBoard(sounds *sounds, size int) (*Board, error) {
 						b.generateFood()
 						tail := len(b.snake.body) - 1
 						newTile := &Tile{
-							x: b.snake.body[tail].x,
-							y: b.snake.body[tail].y,
+							x:    b.snake.body[tail].x,
+							y:    b.snake.body[tail].y,
 							dirX: b.snake.body[tail].dirX,
 							dirY: b.snake.body[tail].dirY,
 						}
@@ -289,6 +304,16 @@ func (board *Board) Draw(boardImage *ebiten.Image) {
 
 	boardImage.DrawImage(backgroundImage, op)
 
+	if board.GetPoints() >= 3 {
+		boardImage.DrawImage(backgroundImage2, op)
+	}
+	if board.GetPoints() >= 6 {
+		boardImage.DrawImage(backgroundImage3, op)
+	}
+	if board.GetPoints() >= 9 {
+		boardImage.DrawImage(backgroundImage4, op)
+	}
+
 	for i, tile := range board.snake.body {
 		if i == 0 {
 			op := &ebiten.DrawImageOptions{}
@@ -324,7 +349,7 @@ func (board *Board) Draw(boardImage *ebiten.Image) {
 			} else if tile.dirY == -1 {
 				bodyImage = tardiHeadImageUp
 			}
-			
+
 			boardImage.DrawImage(bodyImage, op)
 		}
 
