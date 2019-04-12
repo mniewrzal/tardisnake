@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/ebiten/audio"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 	"golang.org/x/image/font"
 )
@@ -58,15 +59,17 @@ type Food struct {
 // Board represents the game board.
 type Board struct {
 	size     int
+	audio    *audio.Player
 	snake    Snake
 	food     Food
 	playMode bool
 }
 
 // NewBoard generates a new Board with giving a size.
-func NewBoard(size int) (*Board, error) {
+func NewBoard(audio *audio.Player, size int) (*Board, error) {
 	b := &Board{
 		size: size,
+		audio: audio,
 		snake: Snake{
 			body: []*Tile{
 				&Tile{
@@ -89,6 +92,17 @@ func NewBoard(size int) (*Board, error) {
 		},
 		playMode: true,
 	}
+	go func() {
+		for {
+			if !b.playMode {
+				audio.Pause()
+			}
+			if !audio.IsPlaying() {
+				audio.Rewind()
+				audio.Play()
+			}
+		}
+	}()
 	head := b.snake.body[0]
 	go func() {
 		for {
