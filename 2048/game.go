@@ -12,19 +12,19 @@ import (
 	"github.com/golang/freetype/truetype"
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/audio"
-	"github.com/hajimehoshi/ebiten/audio/wav"
 	"github.com/hajimehoshi/ebiten/audio/vorbis"
+	"github.com/hajimehoshi/ebiten/audio/wav"
+	"github.com/hajimehoshi/ebiten/ebitenutil"
 	"github.com/hajimehoshi/ebiten/examples/resources/fonts"
 	"github.com/hajimehoshi/ebiten/text"
-	"github.com/hajimehoshi/ebiten/ebitenutil"
 	"golang.org/x/image/font"
 )
 
 const (
-	ScreenWidth  = 1020
-	ScreenHeight = 1000
-	boardSize    = 15
-	sampleRate = 44100
+	ScreenWidth  = 900
+	ScreenHeight = 900
+	boardSize    = 18
+	sampleRate   = 44100
 )
 
 var (
@@ -116,7 +116,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	op.GeoM.Translate(float64(x), float64(y))
 	screen.DrawImage(g.boardImage, op)
 
-	text.Draw(screen, "Points: "+strconv.Itoa(g.board.GetPoints()), getArcadeFonts(3), 10, 30, shadowColor)
+	text.Draw(screen, "Points: "+strconv.Itoa(g.board.GetPoints()), getArcadeFonts(3), 10, 30, color.White)
 
 	if g.board.playMode == false {
 		screen.Fill(backgroundColor)
