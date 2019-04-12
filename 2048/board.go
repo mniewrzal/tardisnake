@@ -13,7 +13,7 @@ import (
 
 var (
 	tileSize   = 50
-	tileMargin = 4
+	tileMargin = 0
 )
 
 var (
@@ -117,7 +117,6 @@ func NewBoard(size int) (*Board, error) {
 				b.snake.body[i].x = b.snake.body[i-1].x
 				b.snake.body[i].y = b.snake.body[i-1].y
 			}
-			fmt.Println("direction", b.snake.directionX)
 			if head.x <= b.size {
 				if head.x == 0 && b.snake.directionX == -1 {
 					head.x = b.size + 1
