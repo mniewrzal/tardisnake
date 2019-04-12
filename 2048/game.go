@@ -76,6 +76,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screen.DrawImage(g.boardImage, op)
 
 	text.Draw(screen, "Points: "+strconv.Itoa(g.board.GetPoints()), getArcadeFonts(3), 10, 30, shadowColor)
+
+	if g.board.playMode == false {
+		screen.Fill(backgroundColor)
+		text.Draw(screen, "you died", getArcadeFonts(3), 10, 30, shadowColor)
+		text.Draw(screen, "time to restart from terminal! :)", getArcadeFonts(3), 10, 70, shadowColor)
+		text.Draw(screen, "your score: "+strconv.Itoa(g.board.GetPoints()), getArcadeFonts(3), 10, 120, shadowColor)
+	}
 }
 
 func getArcadeFonts(scale int) font.Face {

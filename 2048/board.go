@@ -1,8 +1,8 @@
 package twenty48
 
 import (
-	"image/color"
 	"fmt"
+	"image/color"
 	"math/rand"
 	"time"
 
@@ -21,15 +21,12 @@ var (
 	frameColor      = color.RGBA{0xbb, 0xad, 0xa0, 0xff}
 )
 
-var (
-	tileImage *ebiten.Image
-)
-
 const (
 	arcadeFontBaseSize = 8
 )
 
 var (
+	tileImage   *ebiten.Image
 	arcadeFonts map[int]font.Face
 	foodImage   *ebiten.Image
 )
@@ -60,9 +57,10 @@ type Food struct {
 
 // Board represents the game board.
 type Board struct {
-	size  int
-	snake Snake
-	food  Food
+	size     int
+	snake    Snake
+	food     Food
+	playMode bool
 }
 
 // NewBoard generates a new Board with giving a size.
@@ -89,12 +87,13 @@ func NewBoard(size int) (*Board, error) {
 		food: Food{
 			tiles: make([]*Tile, 1),
 		},
+		playMode: true,
 	}
 	head := b.snake.body[0]
 	go func() {
 		for {
 			time.Sleep(150 * time.Millisecond)
-			
+
 			next := &Tile{
 				x: head.x + b.snake.directionX,
 				y: head.y + b.snake.directionY,
@@ -108,6 +107,7 @@ func NewBoard(size int) (*Board, error) {
 						b.snake.directionY *= -1
 					}
 				} else {
+					b.playMode = false
 					fmt.Println("Snake ate itself. Game over :(")
 					return
 				}
@@ -143,7 +143,7 @@ func NewBoard(size int) (*Board, error) {
 		}
 	}()
 	go func() {
-		for {
+		for b.playMode {
 			time.Sleep(4 * time.Second)
 			b.generateFood()
 		}
@@ -214,8 +214,8 @@ func (board *Board) Draw(boardImage *ebiten.Image) {
 		for i := 0; i < board.size; i++ {
 			// v := 0
 			op := &ebiten.DrawImageOptions{}
-			x := i*tileSize 
-			y := j*tileSize 
+			x := i * tileSize
+			y := j * tileSize
 			op.GeoM.Translate(float64(x), float64(y))
 
 			r, g, b, a := colorToScale(color.NRGBA{0xee, 0xe4, 0xda, 0x59})
@@ -226,8 +226,8 @@ func (board *Board) Draw(boardImage *ebiten.Image) {
 
 	for _, tile := range board.snake.body {
 		op := &ebiten.DrawImageOptions{}
-		x := tile.x*tileSize 
-		y := tile.y*tileSize 
+		x := tile.x * tileSize
+		y := tile.y * tileSize
 		op.GeoM.Translate(float64(x), float64(y))
 
 		r, g, b, a := colorToScale(color.NRGBA{0xee, 0xFF, 0xFF, 0xFF})
@@ -240,8 +240,8 @@ func (board *Board) Draw(boardImage *ebiten.Image) {
 			continue
 		}
 		op := &ebiten.DrawImageOptions{}
-		x := tile.x*tileSize 
-		y := tile.y*tileSize
+		x := tile.x * tileSize
+		y := tile.y * tileSize
 		op.GeoM.Translate(float64(x), float64(y))
 
 		r, g, b, a := colorToScale(color.NRGBA{0xee, 0xAA, 0xAA, 0xAA})

@@ -1,7 +1,5 @@
 // Copyright 2016 The Ebiten Authors
 
-
-
 package main
 
 import (
@@ -32,7 +30,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err := ebiten.Run(update, twenty48.ScreenWidth, twenty48.ScreenHeight, 1, "2048 (Ebiten Demo)"); err != nil {
+	if err := ebiten.Run(update, twenty48.ScreenWidth, twenty48.ScreenHeight, 1, "tardisnake"); err != nil {
 		log.Fatal(err)
 	}
 }
