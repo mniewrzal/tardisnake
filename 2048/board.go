@@ -17,7 +17,7 @@ var (
 )
 
 var (
-	backgroundColor = color.RGBA{0xfa, 0xf8, 0xef, 0xff}
+	backgroundColor = color.RGBA{0x17, 0x9c, 0xc1, 0xff}
 	frameColor      = color.RGBA{0xbb, 0xad, 0xa0, 0xff}
 )
 
@@ -26,16 +26,25 @@ const (
 )
 
 var (
-	tileImage   *ebiten.Image
-	arcadeFonts map[int]font.Face
-	foodImage   *ebiten.Image
+	tileImage       *ebiten.Image
+	arcadeFonts     map[int]font.Face
+	chosenFood      *ebiten.Image
+	foodImage       *ebiten.Image
+	foodImage2      *ebiten.Image
+	backgroundImage *ebiten.Image
 )
 
 func init() {
 	tileImage, _ = ebiten.NewImage(tileSize, tileSize, ebiten.FilterDefault)
 	tileImage.Fill(color.White)
 
-	foodImage, _, _ = ebitenutil.NewImageFromFile("encrypt.png", ebiten.FilterDefault)
+	foodImage, _, _ = ebitenutil.NewImageFromFile("folder.png", ebiten.FilterDefault)
+	foodImage2, _, _ = ebitenutil.NewImageFromFile("bucket.png", ebiten.FilterDefault)
+	var err error
+	backgroundImage, _, err = ebitenutil.NewImageFromFile("space.png", ebiten.FilterDefault)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 type task func() error
@@ -140,6 +149,12 @@ func NewBoard(size int) (*Board, error) {
 			if b.food.tiles[0] != nil {
 				for _, f := range b.food.tiles {
 					if head.x == f.x && head.y == f.y {
+						r := rand.Intn(2)
+						if r == 0 {
+							chosenFood = foodImage
+						} else {
+							chosenFood = foodImage2
+						}
 						b.generateFood()
 						tail := len(b.snake.body) - 1
 						newTile := &Tile{x: b.snake.body[tail].x, y: b.snake.body[tail].y}
@@ -217,19 +232,22 @@ func (b *Board) GetPoints() int {
 // Draw draws the board to the given boardImage.
 func (board *Board) Draw(boardImage *ebiten.Image) {
 	boardImage.Fill(frameColor)
-	for j := 0; j < board.size; j++ {
-		for i := 0; i < board.size; i++ {
-			// v := 0
-			op := &ebiten.DrawImageOptions{}
-			x := i * tileSize
-			y := j * tileSize
-			op.GeoM.Translate(float64(x), float64(y))
+	// for j := 0; j < board.size; j++ {
+	// 	for i := 0; i < board.size; i++ {
+	// 		// v := 0
+	// 		op := &ebiten.DrawImageOptions{}
+	// 		x := i * tileSize
+	// 		y := j * tileSize
+	// 		op.GeoM.Translate(float64(x), float64(y))
 
-			r, g, b, a := colorToScale(color.NRGBA{0xee, 0xe4, 0xda, 0x59})
-			op.ColorM.Scale(r, g, b, a)
-			boardImage.DrawImage(tileImage, op)
-		}
-	}
+	// 		r, g, b, a := colorToScale(color.NRGBA{0xee, 0xe4, 0xda, 0x59})
+	// 		op.ColorM.Scale(r, g, b, a)
+	// 		boardImage.DrawImage(tileImage, op)
+	// 	}
+	// }
+	op := &ebiten.DrawImageOptions{}
+
+	boardImage.DrawImage(backgroundImage, op)
 
 	for i, tile := range board.snake.body {
 		var snakeColor color.NRGBA
@@ -257,9 +275,10 @@ func (board *Board) Draw(boardImage *ebiten.Image) {
 		y := tile.y * tileSize
 		op.GeoM.Translate(float64(x), float64(y))
 
-		r, g, b, a := colorToScale(color.NRGBA{0xee, 0xAA, 0xAA, 0xAA})
-		op.ColorM.Scale(r, g, b, a)
-		boardImage.DrawImage(foodImage, op)
+		if chosenFood == nil {
+			chosenFood = foodImage
+		}
+		boardImage.DrawImage(chosenFood, op)
 	}
 }
 
