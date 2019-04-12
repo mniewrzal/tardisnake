@@ -28,6 +28,11 @@ var (
 	foodImage       *ebiten.Image
 	foodImage2      *ebiten.Image
 	backgroundImage *ebiten.Image
+
+	tardiHeadImageUp    *ebiten.Image
+	tardiHeadImageRight *ebiten.Image
+	tardiHeadImageDown  *ebiten.Image
+	tardiHeadImageLeft  *ebiten.Image
 )
 
 func init() {
@@ -41,6 +46,11 @@ func init() {
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	tardiHeadImageUp, _, _ = ebitenutil.NewImageFromFile("t1.png", ebiten.FilterDefault)
+	tardiHeadImageRight, _, _ = ebitenutil.NewImageFromFile("t2.png", ebiten.FilterDefault)
+	tardiHeadImageDown, _, _ = ebitenutil.NewImageFromFile("t3.png", ebiten.FilterDefault)
+	tardiHeadImageLeft, _, _ = ebitenutil.NewImageFromFile("t4.png", ebiten.FilterDefault)
 }
 
 type Tile struct {
@@ -262,18 +272,35 @@ func (board *Board) Draw(boardImage *ebiten.Image) {
 	for i, tile := range board.snake.body {
 		var snakeColor color.NRGBA
 		if i == 0 {
-			snakeColor = color.NRGBA{0x00, 0xFF, 0xCC, 0xFF}
-		} else {
-			snakeColor = color.NRGBA{0xee, 0xFF, 0xFF, 0xFF}
-		}
-		op := &ebiten.DrawImageOptions{}
-		x := tile.x * tileSize
-		y := tile.y * tileSize
-		op.GeoM.Translate(float64(x), float64(y))
+			op := &ebiten.DrawImageOptions{}
+			x := tile.x * tileSize
+			y := tile.y * tileSize
+			op.GeoM.Translate(float64(x), float64(y))
 
-		r, g, b, a := colorToScale(snakeColor)
-		op.ColorM.Scale(r, g, b, a)
-		boardImage.DrawImage(tileImage, op)
+			var headImage *ebiten.Image
+			if board.snake.directionX == 1 {
+				headImage = tardiHeadImageRight
+			} else if board.snake.directionX == -1 {
+				headImage = tardiHeadImageLeft
+			} else if board.snake.directionY == 1 {
+				headImage = tardiHeadImageDown
+			} else if board.snake.directionY == -1 {
+				headImage = tardiHeadImageUp
+			}
+
+			boardImage.DrawImage(headImage, op)
+		} else {
+			op := &ebiten.DrawImageOptions{}
+			x := tile.x * tileSize
+			y := tile.y * tileSize
+			op.GeoM.Translate(float64(x), float64(y))
+
+			snakeColor = color.NRGBA{0xee, 0xFF, 0xFF, 0xFF}
+			r, g, b, a := colorToScale(snakeColor)
+			op.ColorM.Scale(r, g, b, a)
+			boardImage.DrawImage(tileImage, op)
+		}
+
 	}
 
 	for _, tile := range board.food.tiles {
