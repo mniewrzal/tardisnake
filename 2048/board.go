@@ -53,17 +53,19 @@ type Food struct {
 // Board represents the game board.
 type Board struct {
 	size     int
-	audio    *audio.Player
+	music    *audio.Player
+	death *audio.Player
 	snake    Snake
 	food     Food
 	playMode bool
 }
 
 // NewBoard generates a new Board with giving a size.
-func NewBoard(audio *audio.Player, size int) (*Board, error) {
+func NewBoard(music, death *audio.Player, size int) (*Board, error) {
 	b := &Board{
 		size: size,
-		audio: audio,
+		music: music,
+		death: death,
 		snake: Snake{
 			body: []*Tile{
 				&Tile{
@@ -89,11 +91,11 @@ func NewBoard(audio *audio.Player, size int) (*Board, error) {
 	go func() {
 		for {
 			if !b.playMode {
-				audio.Pause()
+				music.Pause()
 			}
-			if !audio.IsPlaying() {
-				audio.Rewind()
-				audio.Play()
+			if !music.IsPlaying() {
+				music.Rewind()
+				music.Play()
 			}
 		}
 	}()
@@ -116,6 +118,7 @@ func NewBoard(audio *audio.Player, size int) (*Board, error) {
 					}
 				} else {
 					b.playMode = false
+					b.death.Play()
 					fmt.Println("Snake ate itself. Game over :(")
 					return
 				}
