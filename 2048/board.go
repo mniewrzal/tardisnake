@@ -21,15 +21,12 @@ var (
 	frameColor      = color.RGBA{0xbb, 0xad, 0xa0, 0xff}
 )
 
-var (
-	tileImage *ebiten.Image
-)
-
 const (
 	arcadeFontBaseSize = 8
 )
 
 var (
+	tileImage   *ebiten.Image
 	arcadeFonts map[int]font.Face
 	foodImage   *ebiten.Image
 )
@@ -60,9 +57,10 @@ type Food struct {
 
 // Board represents the game board.
 type Board struct {
-	size  int
-	snake Snake
-	food  Food
+	size     int
+	snake    Snake
+	food     Food
+	playMode bool
 }
 
 // NewBoard generates a new Board with giving a size.
@@ -89,6 +87,7 @@ func NewBoard(size int) (*Board, error) {
 		food: Food{
 			tiles: make([]*Tile, 1),
 		},
+		playMode: true,
 	}
 	head := b.snake.body[0]
 	go func() {
@@ -108,6 +107,7 @@ func NewBoard(size int) (*Board, error) {
 						b.snake.directionY *= -1
 					}
 				} else {
+					b.playMode = false
 					fmt.Println("Snake ate itself. Game over :(")
 					return
 				}
@@ -150,7 +150,7 @@ func NewBoard(size int) (*Board, error) {
 		}
 	}()
 	go func() {
-		for {
+		for b.playMode {
 			time.Sleep(4 * time.Second)
 			b.generateFood()
 		}
