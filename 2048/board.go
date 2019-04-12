@@ -7,18 +7,9 @@ import (
 	"time"
 
 	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/ebiten/audio"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 	"golang.org/x/image/font"
-)
-
-var (
-	tileSize   = 50
-	tileMargin = 4
-)
-
-var (
-	backgroundColor = color.RGBA{0x17, 0x9c, 0xc1, 0xff}
-	frameColor      = color.RGBA{0xbb, 0xad, 0xa0, 0xff}
 )
 
 const (
@@ -26,6 +17,12 @@ const (
 )
 
 var (
+	backgroundColor = color.RGBA{0x17, 0x9c, 0xc1, 0xff}
+	tileSize        = 50
+	tileMargin      = 0
+
+	frameColor = color.RGBA{0xbb, 0xad, 0xa0, 0xff}
+
 	tileImage       *ebiten.Image
 	arcadeFonts     map[int]font.Face
 	chosenFood      *ebiten.Image
@@ -47,8 +44,6 @@ func init() {
 	}
 }
 
-type task func() error
-
 type Tile struct {
 	x int
 	y int
@@ -67,15 +62,17 @@ type Food struct {
 // Board represents the game board.
 type Board struct {
 	size     int
+	audio    *audio.Player
 	snake    Snake
 	food     Food
 	playMode bool
 }
 
 // NewBoard generates a new Board with giving a size.
-func NewBoard(size int) (*Board, error) {
+func NewBoard(audio *audio.Player, size int) (*Board, error) {
 	b := &Board{
-		size: size,
+		size:  size,
+		audio: audio,
 		snake: Snake{
 			body: []*Tile{
 				&Tile{
@@ -98,6 +95,17 @@ func NewBoard(size int) (*Board, error) {
 		},
 		playMode: true,
 	}
+	go func() {
+		for {
+			if !b.playMode {
+				audio.Pause()
+			}
+			if !audio.IsPlaying() {
+				audio.Rewind()
+				audio.Play()
+			}
+		}
+	}()
 	head := b.snake.body[0]
 	go func() {
 		for {
@@ -126,7 +134,6 @@ func NewBoard(size int) (*Board, error) {
 				b.snake.body[i].x = b.snake.body[i-1].x
 				b.snake.body[i].y = b.snake.body[i-1].y
 			}
-			fmt.Println("direction", b.snake.directionX)
 			if head.x <= b.size {
 				if head.x == 0 && b.snake.directionX == -1 {
 					head.x = b.size + 1

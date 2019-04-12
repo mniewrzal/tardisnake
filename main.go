@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"github.com/hajimehoshi/ebiten"
-	"github.com/mniewrzal/tardisnake/2048"
+	twenty48 "github.com/mniewrzal/tardisnake/2048"
 )
 
 var (
@@ -30,7 +30,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err := ebiten.Run(update, twenty48.ScreenWidth, twenty48.ScreenHeight, 1, "tardisnake"); err != nil {
+	if err := ebiten.Run(update, twenty48.ScreenWidth, twenty48.ScreenHeight, 1, "Tardisnake!!!"); err != nil {
 		log.Fatal(err)
 	}
 }

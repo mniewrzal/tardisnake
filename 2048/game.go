@@ -11,8 +11,11 @@ import (
 
 	"github.com/golang/freetype/truetype"
 	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/ebiten/audio"
+	"github.com/hajimehoshi/ebiten/audio/vorbis"
 	"github.com/hajimehoshi/ebiten/examples/resources/fonts"
 	"github.com/hajimehoshi/ebiten/text"
+	"github.com/hajimehoshi/ebiten/ebitenutil"
 	"golang.org/x/image/font"
 )
 
@@ -20,6 +23,7 @@ const (
 	ScreenWidth  = 1020
 	ScreenHeight = 1000
 	boardSize    = 15
+	sampleRate = 44100
 )
 
 var (
@@ -43,11 +47,31 @@ func NewGame() (*Game, error) {
 		input: NewInput(),
 	}
 	var err error
-	g.board, err = NewBoard(boardSize)
+	audio, err := newAudio()
+	if err != nil {
+		return nil, err
+	}
+	g.board, err = NewBoard(audio, boardSize)
 	if err != nil {
 		return nil, err
 	}
 	return g, nil
+}
+
+func newAudio() (*audio.Player, error) {
+	audioContext, err := audio.NewContext(sampleRate)
+	if err != nil {
+		return nil, err
+	}
+	f, err := ebitenutil.OpenFile("chiptronical.ogg")
+	if err != nil {
+		return nil, err
+	}
+	d, err := vorbis.Decode(audioContext, f)
+	if err != nil {
+		return nil, err
+	}
+	return audio.NewPlayer(audioContext, d)
 }
 
 // Update updates the current game state.
