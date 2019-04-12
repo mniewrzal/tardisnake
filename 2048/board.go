@@ -117,13 +117,20 @@ func NewBoard(size int) (*Board, error) {
 				b.snake.body[i].x = b.snake.body[i-1].x
 				b.snake.body[i].y = b.snake.body[i-1].y
 			}
+			fmt.Println("direction", b.snake.directionX)
 			if head.x <= b.size {
+				if head.x == 0 && b.snake.directionX == -1 {
+					head.x = b.size + 1
+				}
 				head.x += b.snake.directionX
 			} else {
 				head.x -= b.size + 1
 			}
 
 			if head.y <= b.size {
+				if head.y == 0 && b.snake.directionY == -1 {
+					head.y = b.size + 1
+				}
 				head.y += b.snake.directionY
 			} else {
 				head.y -= b.size + 1
