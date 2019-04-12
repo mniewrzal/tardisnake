@@ -224,13 +224,19 @@ func (board *Board) Draw(boardImage *ebiten.Image) {
 		}
 	}
 
-	for _, tile := range board.snake.body {
+	for i, tile := range board.snake.body {
+		var snakeColor color.NRGBA
+		if i == 0 {
+			snakeColor = color.NRGBA{0x00, 0xFF, 0xCC, 0xFF}
+		} else {
+			snakeColor = color.NRGBA{0xee, 0xFF, 0xFF, 0xFF}
+		}
 		op := &ebiten.DrawImageOptions{}
 		x := tile.x * tileSize
 		y := tile.y * tileSize
 		op.GeoM.Translate(float64(x), float64(y))
 
-		r, g, b, a := colorToScale(color.NRGBA{0xee, 0xFF, 0xFF, 0xFF})
+		r, g, b, a := colorToScale(snakeColor)
 		op.ColorM.Scale(r, g, b, a)
 		boardImage.DrawImage(tileImage, op)
 	}
