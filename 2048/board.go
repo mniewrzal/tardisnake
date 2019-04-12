@@ -12,21 +12,17 @@ import (
 	"golang.org/x/image/font"
 )
 
-var (
-	tileSize   = 50
-	tileMargin = 4
-)
-
-var (
-	backgroundColor = color.RGBA{0xfa, 0xf8, 0xef, 0xff}
-	frameColor      = color.RGBA{0xbb, 0xad, 0xa0, 0xff}
-)
-
 const (
 	arcadeFontBaseSize = 8
 )
 
 var (
+	tileSize   = 50
+	tileMargin = 0
+
+	backgroundColor = color.RGBA{0xfa, 0xf8, 0xef, 0xff}
+	frameColor      = color.RGBA{0xbb, 0xad, 0xa0, 0xff}
+
 	tileImage   *ebiten.Image
 	arcadeFonts map[int]font.Face
 	foodImage   *ebiten.Image
@@ -38,8 +34,6 @@ func init() {
 
 	foodImage, _, _ = ebitenutil.NewImageFromFile("encrypt.png", ebiten.FilterDefault)
 }
-
-type task func() error
 
 type Tile struct {
 	x int
@@ -131,7 +125,6 @@ func NewBoard(audio *audio.Player, size int) (*Board, error) {
 				b.snake.body[i].x = b.snake.body[i-1].x
 				b.snake.body[i].y = b.snake.body[i-1].y
 			}
-			fmt.Println("direction", b.snake.directionX)
 			if head.x <= b.size {
 				if head.x == 0 && b.snake.directionX == -1 {
 					head.x = b.size + 1
