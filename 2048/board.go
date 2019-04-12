@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/audio"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 	"golang.org/x/image/font"
 )
@@ -62,19 +61,17 @@ type Food struct {
 // Board represents the game board.
 type Board struct {
 	size     int
-	music    *audio.Player
-	death *audio.Player
+	sounds    *sounds
 	snake    Snake
 	food     Food
 	playMode bool
 }
 
 // NewBoard generates a new Board with giving a size.
-func NewBoard(music, death *audio.Player, size int) (*Board, error) {
+func NewBoard(sounds *sounds, size int) (*Board, error) {
 	b := &Board{
 		size: size,
-		music: music,
-		death: death,
+		sounds: sounds,
 		snake: Snake{
 			body: []*Tile{
 				&Tile{
@@ -100,11 +97,11 @@ func NewBoard(music, death *audio.Player, size int) (*Board, error) {
 	go func() {
 		for {
 			if !b.playMode {
-				music.Pause()
+				sounds.music.Pause()
 			}
-			if !music.IsPlaying() {
-				music.Rewind()
-				music.Play()
+			if !sounds.music.IsPlaying() {
+				sounds.music.Rewind()
+				sounds.music.Play()
 			}
 		}
 	}()
@@ -127,7 +124,7 @@ func NewBoard(music, death *audio.Player, size int) (*Board, error) {
 					}
 				} else {
 					b.playMode = false
-					b.death.Play()
+					sounds.death.Play()
 					fmt.Println("Snake ate itself. Game over :(")
 					return
 				}
@@ -159,6 +156,9 @@ func NewBoard(music, death *audio.Player, size int) (*Board, error) {
 			if b.food.tiles[0] != nil {
 				for _, f := range b.food.tiles {
 					if head.x == f.x && head.y == f.y {
+						sounds.score.Rewind()
+						sounds.score.Play()
+						
 						r := rand.Intn(2)
 						if r == 0 {
 							chosenFood = foodImage

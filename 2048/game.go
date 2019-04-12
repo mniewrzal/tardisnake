@@ -11,12 +11,8 @@ import (
 
 	"github.com/golang/freetype/truetype"
 	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/audio"
-	"github.com/hajimehoshi/ebiten/audio/wav"
-	"github.com/hajimehoshi/ebiten/audio/vorbis"
 	"github.com/hajimehoshi/ebiten/examples/resources/fonts"
 	"github.com/hajimehoshi/ebiten/text"
-	"github.com/hajimehoshi/ebiten/ebitenutil"
 	"golang.org/x/image/font"
 )
 
@@ -48,47 +44,15 @@ func NewGame() (*Game, error) {
 		input: NewInput(),
 	}
 	var err error
-	music, death, err := newAudio()
+	sounds, err := newAudio()
 	if err != nil {
 		return nil, err
 	}
-	g.board, err = NewBoard(music, death, boardSize)
+	g.board, err = NewBoard(sounds, boardSize)
 	if err != nil {
 		return nil, err
 	}
 	return g, nil
-}
-
-func newAudio() (music, death *audio.Player, err error) {
-	audioContext, err := audio.NewContext(sampleRate)
-	if err != nil {
-		return nil, nil, err
-	}
-	f1, err := ebitenutil.OpenFile("chiptronical.ogg")
-	if err != nil {
-		return nil, nil, err
-	}
-	d1, err := vorbis.Decode(audioContext, f1)
-	if err != nil {
-		return nil, nil, err
-	}
-	f2, err := ebitenutil.OpenFile("death.wav")
-	if err != nil {
-		return nil, nil, err
-	}
-	d2, err := wav.Decode(audioContext, f2)
-	if err != nil {
-		return nil, nil, err
-	}
-	music, err = audio.NewPlayer(audioContext, d1)
-	if err != nil {
-		return nil, nil, err
-	}
-	death, err = audio.NewPlayer(audioContext, d2)
-	if err != nil {
-		return nil, nil, err
-	}
-	return music, death, nil
 }
 
 // Update updates the current game state.
