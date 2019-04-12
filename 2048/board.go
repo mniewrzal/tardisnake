@@ -56,6 +56,8 @@ func init() {
 type Tile struct {
 	x int
 	y int
+	dirX int
+	dirY int
 }
 
 type Snake struct {
@@ -87,13 +89,19 @@ func NewBoard(sounds *sounds, size int) (*Board, error) {
 				&Tile{
 					x: 2,
 					y: 0,
+					dirX: 1,
+					dirY: 0,
 				},
 				&Tile{
 					x: 1,
 					y: 0,
+					dirX: 1,
+					dirY: 0,
 				}, &Tile{
 					x: 0,
 					y: 0,
+					dirX: 1,
+					dirY: 0,
 				},
 			},
 			directionX: 1,
@@ -143,14 +151,19 @@ func NewBoard(sounds *sounds, size int) (*Board, error) {
 			for i := len(b.snake.body) - 1; i > 0; i-- {
 				b.snake.body[i].x = b.snake.body[i-1].x
 				b.snake.body[i].y = b.snake.body[i-1].y
+
+				b.snake.body[i].dirX = b.snake.body[i-1].dirX
+				b.snake.body[i].dirY = b.snake.body[i-1].dirY
 			}
 			if head.x <= b.size {
 				if head.x == 0 && b.snake.directionX == -1 {
 					head.x = b.size + 1
 				}
 				head.x += b.snake.directionX
+				head.dirX = b.snake.directionX
 			} else {
 				head.x -= b.size + 1
+				head.dirX = b.snake.directionX
 			}
 
 			if head.y <= b.size {
@@ -158,8 +171,10 @@ func NewBoard(sounds *sounds, size int) (*Board, error) {
 					head.y = b.size + 1
 				}
 				head.y += b.snake.directionY
+				head.dirY = b.snake.directionY
 			} else {
 				head.y -= b.size + 1
+				head.dirY = b.snake.directionY
 			}
 
 			// check if food has been found
@@ -177,7 +192,12 @@ func NewBoard(sounds *sounds, size int) (*Board, error) {
 						}
 						b.generateFood()
 						tail := len(b.snake.body) - 1
-						newTile := &Tile{x: b.snake.body[tail].x, y: b.snake.body[tail].y}
+						newTile := &Tile{
+							x: b.snake.body[tail].x,
+							y: b.snake.body[tail].y,
+							dirX: b.snake.body[tail].dirX,
+							dirY: b.snake.body[tail].dirY,
+						}
 						b.snake.body = append(b.snake.body, newTile)
 					}
 				}
@@ -270,7 +290,6 @@ func (board *Board) Draw(boardImage *ebiten.Image) {
 	boardImage.DrawImage(backgroundImage, op)
 
 	for i, tile := range board.snake.body {
-		var snakeColor color.NRGBA
 		if i == 0 {
 			op := &ebiten.DrawImageOptions{}
 			x := tile.x * tileSize
@@ -295,10 +314,18 @@ func (board *Board) Draw(boardImage *ebiten.Image) {
 			y := tile.y * tileSize
 			op.GeoM.Translate(float64(x), float64(y))
 
-			snakeColor = color.NRGBA{0xee, 0xFF, 0xFF, 0xFF}
-			r, g, b, a := colorToScale(snakeColor)
-			op.ColorM.Scale(r, g, b, a)
-			boardImage.DrawImage(tileImage, op)
+			var bodyImage *ebiten.Image
+			if tile.dirX == 1 {
+				bodyImage = tardiHeadImageRight
+			} else if tile.dirX == -1 {
+				bodyImage = tardiHeadImageLeft
+			} else if tile.dirY == 1 {
+				bodyImage = tardiHeadImageDown
+			} else if tile.dirY == -1 {
+				bodyImage = tardiHeadImageUp
+			}
+			
+			boardImage.DrawImage(bodyImage, op)
 		}
 
 	}
